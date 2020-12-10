@@ -7,7 +7,6 @@ dotenv.config({ path: "./config.env" });
 // const { getAllTasks, createTask } = require("./controllers/taskController");
 const app = express();
 app.use(express.urlencoded({ extended: true }));
-const PORT = 3000;
 // app.get("/todoList/tasks", getAllTasks);
 app.use(express.json());
 // app.post("/todoList/tasks", createTask);

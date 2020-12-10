@@ -29,28 +29,6 @@ const verifyPostRequest = (req, res, next) => {
   }
 };
 
-const patchRequest = (taskIndex, req, res, next) => {
-  console.log("patch executec");
-  console.log(taskIndex);
-  // const updateProperties = ["taskName", "status"];
-  // let result = updateProperties.every((key) => {
-  //   return req.body[key];
-  // });
-  // if (!result) {
-  //   // res.status(400).json({
-  //   //   status: "Unsuccessful",
-  //   //   message: "request body is not valid",
-  //   // });
-  //   sendErrorMessage(
-  //     new AppError(400, "Unsuccessful", "request body is not valid"),
-  //     req,
-  //     res
-  //   );
-  // } else {
-  //   next();
-  // }
-};
-
 const getAllTasks = (req, res, next) => {
   //   res.status(200).json({
   //     status: "successful",
@@ -84,12 +62,13 @@ const createTask = (req, res, next) => {
 };
 
 const getbyId = (req, res, next) => {
-  let taskIndex = tasks.findIndex((task) => {
+  let task = tasks.find((task) => {
     return task.taskId === req.params.taskId;
+    console.log(task);
   });
 
-  if (taskIndex !== -1) {
-    sendResponse(200, "Successful", tasks[taskIndex], req, res);
+  if (task) {
+    sendResponse(200, "Successful", task, req, res);
   } else {
     return sendErrorMessage(
       new AppError(200, "User not found", "Error in finding ID"),
@@ -98,26 +77,68 @@ const getbyId = (req, res, next) => {
     );
   }
 
-  next(taskIndex);
+  next();
 };
 
-const updateTask = (taskIndex, req, res, next) => {
-  // let taskObject = tasks[taskIndex];
-  // //middlewarre for validation
-  // //through getbyid we get index
-  // //we will get object from array using index after that we will into object by key
-  // //we will write the task array into json file
-  // taskObject.forEach((key) => {
-  //   if (task[key]) {
-  //     task[key] = req.body[key];
-  //   }
-  // });
-  // sendResponse(200, "Successfully updated", task, req, res);
+const patchRequest = (req, res, next) => {
+  console.log("patch executec");
+  // console.log(taskIndex);
+  const updateProperties = ["taskName", "status"];
+  let result = updateProperties.every((key) => {
+    return req.body[key];
+  });
+  if (!result) {
+    // res.status(400).json({
+    //   status: "Unsuccessful",
+    //   message: "request body is not valid",
+    // });
+    sendErrorMessage(
+      new AppError(400, "Unsuccessful", "request body is not valid"),
+      req,
+      res
+    );
+  } else {
+    next();
+  }
+};
+
+const updateTask = (req, res, next) => {
+  let task = tasks.find((task) => {
+    return task.taskId === req.params.taskId;
+    // console.log(task);
+  });
+  if (task) {
+    task.taskName = req.body.taskName;
+    task.status = req.body.status;
+    fs.writeFile(fileName, JSON.stringify(tasks, null, 2), (err) => {
+      if (err) {
+        sendErrorMessage(
+          new AppError(500, "Internal error", "file not updated"),
+          req,
+          res
+        );
+        return err;
+      }
+    });
+    sendResponse(200, "Successful", task, req, res);
+  }
   next();
 };
 module.exports.getAllTasks = getAllTasks;
 module.exports.createTask = createTask;
 module.exports.verifyPostRequest = verifyPostRequest;
 module.exports.getbyId = getbyId;
-module.exports.updateTask = updateTask;
 module.exports.patchRequest = patchRequest;
+module.exports.updateTask = updateTask;
+
+// let taskObject = tasks[taskIndex];
+// //middlewarre for validation
+// //through getbyid we get index
+// //we will get object from array using index after that we will into object by key
+// //we will write the task array into json file
+// taskObject.forEach((key) => {
+//   if (task[key]) {
+//     task[key] = req.body[key];
+//   }
+// });
+// sendResponse(200, "Successfully updated", task, req, res);
